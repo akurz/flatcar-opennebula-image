@@ -69,8 +69,8 @@ coreos:
       content: |
         [Unit]
         Description=User-provided cloud-init setup
-        Requires=network.target,coreos-setup-environment.service
-        After=network.target,coreos-setup-environment.service
+        Requires=network.target,flatcar-setup-environment.service
+        After=network.target,flatcar-setup-environment.service
 
         [Service]
         Type=oneshot
@@ -80,9 +80,9 @@ coreos:
   oem:
     id: opennebula
     name: OpenNebula
-    version-id: 0.1
-    home-url: http://github.com/carletes/coreos-opennebula-image
-    bug-report-url: http://github.com/carletes/coreos-opennebula-image
+    version-id: 0.2
+    home-url: http://github.com/runtastic/flatcar-opennebula-image
+    bug-report-url: http://github.com/runtastic/flatcar-opennebula-image
 
 ssh_authorized_keys:
   # Set Vagrant's insecure SSH public key for second stage of
