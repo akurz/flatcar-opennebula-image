@@ -5,6 +5,6 @@ sudo mkdir /usr/share/oem/bin
 for f in cloudinit common hostname network ssh-key ; do
     sudo mv ~/opennebula-$f /usr/share/oem/bin/
 done
-sudo mv ~/coreos-setup-environment /usr/share/oem/bin/
+sudo mv ~/flatcar-setup-environment /usr/share/oem/bin/
 sudo chown -R root: /usr/share/oem/
 sudo chmod -R 0755 /usr/share/oem/bin
