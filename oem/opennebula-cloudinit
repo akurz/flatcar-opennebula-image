@@ -27,5 +27,4 @@ else
 fi
 
 set -e
-coreos-cloudinit --from-file $user_data --validate
 coreos-cloudinit --from-file $user_data
