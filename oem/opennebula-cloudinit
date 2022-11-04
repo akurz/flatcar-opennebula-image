@@ -12,14 +12,19 @@ echo "Running cloud-init with user data"
 
 if [ -z "$USER_DATA" ] ; then
     if [ -z "$EC2_USER_DATA" ] ; then
-	echo "No user data, leaving."
-	exit 0
+        echo "No user data, leaving."
+        exit 0
     fi
     USER_DATA="$(echo $EC2_USER_DATA | base64 -d)"
 fi
 
 user_data="$(mktemp /tmp/user-data-XXXXXX.yml)"
-echo "$USER_DATA" > $user_data
+
+if [ "$USER_DATA_ENCODING" = "base64" ] ; then
+    echo "$USER_DATA" | base64 -d > $user_data
+else
+    echo "$USER_DATA" > $user_data
+fi
 
 set -e
 coreos-cloudinit --from-file $user_data --validate
