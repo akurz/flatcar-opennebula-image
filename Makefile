@@ -16,7 +16,8 @@ PACKER_IMAGE_DEPS = \
 	oem/opennebula-network \
 	oem/opennebula-ssh-key \
 	scripts/cleanup.sh \
-	scripts/oem.sh
+	scripts/oem.sh \
+	scripts/grub.sh
 
 all: $(PACKER_IMAGE)
 

@@ -54,6 +54,16 @@ variable "net_device" {
   default = "virtio-net"
 }
 
+variable "autologin" {
+  type    = string
+  default = "false"
+}
+
+variable "selinux_enabled" {
+  type    = string
+  default = "false"
+}
+
 packer {
   required_version = ">= 1.8.3, < 2.0.0"
   required_plugins {
@@ -104,6 +114,14 @@ build {
 
   provisioner "shell" {
     scripts = ["scripts/oem.sh", "scripts/cleanup.sh"]
+  }
+
+  provisioner "shell" {
+    environment_vars = [
+      "AUTOLOGIN=${var.autologin}"
+      "SELINUX=${var.selinux_enabled}"
+    ]
+    scripts = ["scripts/grub.sh"]
   }
 
 }
