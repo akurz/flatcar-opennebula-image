@@ -118,7 +118,7 @@ build {
 
   provisioner "shell" {
     environment_vars = [
-      "AUTOLOGIN=${var.autologin}"
+      "AUTOLOGIN=${var.autologin}",
       "SELINUX=${var.selinux_enabled}"
     ]
     scripts = ["scripts/grub.sh"]
