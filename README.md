@@ -1,10 +1,12 @@
-# CoreOS image for OpenNebula
+# Flatcar Container Linux image for OpenNebula
 
 This repository contains a [Packer](https://www.packer.io) template
-for creating [CoreOS](https://coreos.com) KVM images for
+for creating [Flatcar Container Linux](https://flatcar.org) KVM images for
 [OpenNebula](http://opennebula.org).
 
-Based on [@bfraser](https://github.com/bfraser)'s
+Based on [@carletes](https://github.com/carletes)'s
+[coreos-opennebula-image](https://github.com/carletes/coreos-opennebula-image),
+which is based on [@bfraser](https://github.com/bfraser)'s
 [packer-coreos-qemu](https://github.com/bfraser/packer-coreos-qemu).
 
 
@@ -12,8 +14,8 @@ Based on [@bfraser](https://github.com/bfraser)'s
 
 You will need:
 
-* [Packer](https://www.packer.io) (tested with version 0.10.0)
-* [QEMU](http://wiki.qemu.org/Main_Page) (tested with version 2.0.0)
+* [Packer](https://www.packer.io) (tested with version 1.8.3)
+* [QEMU](http://wiki.qemu.org/Main_Page) (tested with version 6.2.0)
 * [GNU Make](https://www.gnu.org/software/make/)
 
 A Linux host with KVM support will make the build much faster.
@@ -22,17 +24,17 @@ The build process is driven with `make`:
 
     $ make
 	[..]
-	Image file builds/coreos-alpha-qemu/coreos-alpha ready
+	Image file builds/flatcar-stable-qemu/flatcar-stable ready
 	$
 
-By default, `make` will build a CoreOS image from the
-[CoreOS alpha channel](https://coreos.com/releases/). You may specify
-a particular CoreOS version and channel by passing the appropriate
+By default, `make` will build a Flatcar image from the
+[Flatcar stable channel](https://stable.release.flatcar-linux.net/amd64-usr/current/).
+You may specify a particular Flatcar version and channel by passing the appropriate
 parameters to `make`:
 
-    $ make COREOS_CHANNEL=stable
+    $ make FLATCAR_CHANNEL=stable
 	[..]
-	Image file builds/coreos-stable-qemu/coreos-stable ready
+	Image file builds/flatcar-stable-qemu/flatcar-stable ready
 	$
 
 
@@ -40,48 +42,48 @@ parameters to `make`:
 
 Once the image has been built, you may upload it to OpenNebula using
 the
-[Sunstone UI](http://docs.opennebula.org/4.14/user/virtual_resource_management/img_guide.html#id1).
+[Sunstone UI](https://docs.opennebula.io/5.12/operation/vm_management/img_guide.html#managing-images).
 
 Alternatively, if you are allowed to access OpenNebula using its
-[command-line tools](http://docs.opennebula.org/4.14/user/references/cli.html#id1),
+[command-line tools](https://docs.opennebula.io/5.12/operation/references/cli.html#command-line-interface),
 you may upload the image usng `make`:
 
     $ make register
 
-The `register` target also accepts specific CoreOS channels and
+The `register` target also accepts specific Flatcar channels and
 versions:
 
-    $ make register COREOS_CHANNEL=stable
+    $ make register FLATCAR_CHANNEL=stable
 
 If you plan on using OpenNebula's
-[EC2 interface](http://docs.opennebula.org/4.14/advanced_administration/public_cloud/ec2qcg.html),
+[EC2 interface](https://docs.opennebula.io/5.12/advanced_components/public_cloud/ec2qug.html#opennebula-ec2-usage),
 the image should be tagged with the attribute `EC2_AMI` set to `YES`
 (the `register` target does this for you).
 
 
 ## Creating an OpenNebula VM template
 
-Before creating CoreOS VMs, you will need to create an
-[OpenNebula VM template](http://docs.opennebula.org/4.14/user/virtual_resource_management/vm_guide.html#creating-virtual-machines)
-which uses the CoreOS images you have built. The VM template should
+Before creating Flatcar VMs, you will need to create an
+[OpenNebula VM template](https://docs.opennebula.io/5.12/operation/vm_management/vm_templates.html#managing-virtual-machine-templates)
+which uses the Flatcar images you have built. The VM template should
 follow these conventions:
 
 * It should use the image you have created and uploaded.
-* The first network interface will be used as CoreOS' private IPv4
+* The first network interface will be used as Flatcar' private IPv4
   address.
 * If there is a second network interface defined, it will be used as
-  CoreOS' public IPv4 network.
+  Flatcar' public IPv4 network.
 * You should add a user input field called `USER_DATA`, so that you
   may pass extra
-  [cloud-config](https://coreos.com/os/docs/latest/cloud-config.html)
-  user data to configure your CoreOS instance.
+  [cloud-config](https://github.com/flatcar/coreos-cloudinit)
+  user data to configure your Flatcar instance.
 
-The following template assumes a CoreOS image called `coreos-alpha`,
+The following template assumes a Flatcar image called `flatcar-stable`,
 and two virtual networks called `public-net` and `private-net`, and
 uses them to provide the disk and the two network interfaces of a
 virtual machine:
 
-	NAME = coreos-alpha
+	NAME = flatcar-stable
 	MEMORY = 512
 	CPU = 1
 	HYPERVISOR = kvm
@@ -91,7 +93,7 @@ virtual machine:
 	]
 	DISK = [
 	  DRIVER = qcow2,
-	  IMAGE = coreos-alpha
+	  IMAGE = flatcar-stable
 	]
 	NIC=[
 	  NETWORK = private-net
@@ -114,56 +116,9 @@ virtual machine:
 	]
 
 
-### Templates for the OpenNebula EC2 interface
-
-If you plan on using OpenNebula's
-[EC2 interface](http://docs.opennebula.org/4.14/advanced_administration/public_cloud/ec2qcg.html),
-your template should follow instead these conventions:
-
-* It must **not** use any image, since the disk will be provided by
-  the AMI you choose when you create your instances.
-* It must include the attribute `EC2_INSTANCE_TYPE` set to a valid AWS
-  instance type. If you plan on using OpenNebula's `econe-*`
-  command-line tools, ensure that name is recognised by the Ruby AWS
-  modules they depend on.
-* The first network interface will be used as CoreOS' private IPv4
-  address.
-* If there is a second network interface defined, it will be used as
-  CoreOS' public IPv4 network.
-
-The following template assumes you have two virtual networks called
-`public-net` and `private-net`, and uses them to provide the two
-network interfaces of a virtual machine:
-
-	NAME = t1.micro
-	EC2_INSTANCE_TYPE = t1.micro
-	MEMORY = 512
-	CPU = 1
-	HYPERVISOR = kvm
-	OS = [
-	  ARCH = x86_64,
-	  BOOT = hd
-	]
-	NIC=[
-	  NETWORK = private-net
-	]
-	NIC=[
-	  NETWORK = public-net
-	]
-	GRAPHICS = [
-	  TYPE = VNC,
-	  LISTEN = 0.0.0.0
-	]
-	CONTEXT = [
-	  NETWORK = YES,
-	  SET_HOSTNAME = "$NAME",
-	  SSH_PUBLIC_KEY = "$USER[SSH_PUBLIC_KEY]"
-	]
-
-
 ### Setting the VM host name
 
-In both examples above, the host name in the VM will be set to the
+The host name in the VM will be set to the
 OpenNebula VM name. If you want the host name to be assigned by
 reverse DNS lookup, replace the line:
 
